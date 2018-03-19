@@ -1,6 +1,7 @@
 ﻿using Gma.System.MouseKeyHook;
 using Screna;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -17,21 +18,30 @@ namespace Captura.Models
         readonly KeystrokesSettings _keystrokesSettings;
 
         bool _mouseClicked;
+        DateTime _lastClickTime;
         
         readonly KeyRecords _records;
+
+        readonly int _clickTimeout;
         #endregion
         
         /// <summary>
         /// Creates a new instance of <see cref="MouseKeyHook"/>.
         /// </summary>
-        public MouseKeyHook(MouseClickSettings MouseClickSettings, KeystrokesSettings KeystrokesSettings)
+        public MouseKeyHook(MouseClickSettings MouseClickSettings, KeystrokesSettings KeystrokesSettings, int FrameRate)
         {
             _mouseClickSettings = MouseClickSettings;
             _keystrokesSettings = KeystrokesSettings;
+            _clickTimeout = 1000 / FrameRate;
             
             _hook = Hook.GlobalEvents();
             
-            _hook.MouseDown += (S, E) => _mouseClicked = true;
+            _hook.MouseDown += (S, E) =>
+            {
+                _mouseClicked = true;
+
+                _lastClickTime = DateTime.Now;
+            };
 
             _hook.MouseUp += (S, E) => _mouseClicked = false;
             
@@ -237,7 +247,7 @@ namespace Captura.Models
 
         void DrawClicks(Graphics g, Func<Point, Point> Transform)
         {
-            if (_mouseClicked)
+            if (_mouseClicked || (DateTime.Now - _lastClickTime).TotalMilliseconds < _clickTimeout)
             {
                 var clickRadius = _mouseClickSettings.Radius;
 

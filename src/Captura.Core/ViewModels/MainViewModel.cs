@@ -703,7 +703,7 @@ namespace Captura.ViewModels
             var overlays = new List<IOverlay> { _webcamOverlay };
 
             if (MouseKeyHookAvailable)
-                overlays.Add(new MouseKeyHook(Settings.Clicks, Settings.Keystrokes));
+                overlays.Add(new MouseKeyHook(Settings.Clicks, Settings.Keystrokes, Settings.Video.FrameRate));
             
             // Custom Overlays
             overlays.AddRange(CustomOverlays.Collection.Where(M => M.Display).Select(M => new CustomOverlay(M, () => TimeSpan)));
